@@ -33,14 +33,14 @@ L2_ETA = 0.019
 
 
 def sorted_files_list(directory):
-    train_files_pos = []
-    train_files_neg = []
-    for filename in os.listdir(directory + "/pos/"):
-        if filename != '.DS_Store':
-              train_files_pos.append(filename)
+    train_files_pos = [
+        filename
+        for filename in os.listdir(directory + "/pos/")
+        if filename != '.DS_Store'
+    ]
 
-    ll1 = list()
-    ll2 = list()
+    ll1 = []
+    ll2 = []
     for f in train_files_pos:
         ss = f.split("_")
         ll1.append(int(ss[0]))
@@ -51,16 +51,18 @@ def sorted_files_list(directory):
 
     ll1, ll2 = zip(*z)
 
-    train_files_pos = [str(ll1[i]) + "_" + ll2[i] for i in range(len(ll1))]
+    train_files_pos = [f"{str(ll1[i])}_" + ll2[i] for i in range(len(ll1))]
     print(train_files_pos[0], train_files_pos[1],
           train_files_pos[12498], train_files_pos[12499])
 
-    for filename in os.listdir(directory + "/neg/"):
-          if filename != '.DS_Store':
-              train_files_neg.append(filename)
+    train_files_neg = [
+        filename
+        for filename in os.listdir(directory + "/neg/")
+        if filename != '.DS_Store'
+    ]
 
-    ll1 = list()
-    ll2 = list()
+    ll1 = []
+    ll2 = []
     for f in train_files_neg:
         ss = f.split("_")
         ll1.append(int(ss[0]))
@@ -71,7 +73,7 @@ def sorted_files_list(directory):
 
     ll1, ll2 = zip(*z)
 
-    train_files_neg = [str(ll1[i]) + "_" + ll2[i] for i in range(len(ll1))]
+    train_files_neg = [f"{str(ll1[i])}_" + ll2[i] for i in range(len(ll1))]
     print(train_files_neg[0], train_files_neg[1],
           train_files_neg[12498], train_files_neg[12499])
 
@@ -80,60 +82,58 @@ def sorted_files_list(directory):
 
 # This function is reused from the model_1.py script; see that file for more information
 def load_dataset_from_feat(directory, feat_file_name, use_for_predictions=False):
-  data = {}
-  data['reviews'] = []
+    data = {'reviews': []}
+    print(os.path.join(directory, feat_file_name))
 
-  print(os.path.join(directory, feat_file_name))
+    if not use_for_predictions:
+      data['sentiments'] = []
 
-  if not use_for_predictions:
-    data['sentiments'] = []
-
-  with open(os.path.join(directory, feat_file_name), 'r') as f:
-    imdb_encoded_content = f.readlines()
-    #if not use_for_predictions:
-    # shuffle the reviews before using, only if training/testing but not if computing predictions for validation
-    #random.shuffle(imdb_encoded_content)
-    print("************************************")
-    #print(imdb_encoded_content)
-    print("************************************")
-    review_encoding = []
-    for review in imdb_encoded_content:
-      review_encoding = review.split()
-      if not use_for_predictions:
-        if int(review_encoding[0]) > DISCRIMINATOR_CUTOFF:
-          data['sentiments'].append(1)
-        else:
-          data['sentiments'].append(0)
-      review_encoding.pop(0)
-      data['reviews'].append(review_encoding)
-  return pd.DataFrame.from_dict(data)
+    with open(os.path.join(directory, feat_file_name), 'r') as f:
+      imdb_encoded_content = f.readlines()
+      #if not use_for_predictions:
+      # shuffle the reviews before using, only if training/testing but not if computing predictions for validation
+      #random.shuffle(imdb_encoded_content)
+      print("************************************")
+      #print(imdb_encoded_content)
+      print("************************************")
+      review_encoding = []
+      for review in imdb_encoded_content:
+        review_encoding = review.split()
+        if not use_for_predictions:
+          if int(review_encoding[0]) > DISCRIMINATOR_CUTOFF:
+            data['sentiments'].append(1)
+          else:
+            data['sentiments'].append(0)
+        review_encoding.pop(0)
+        data['reviews'].append(review_encoding)
+    return pd.DataFrame.from_dict(data)
 
 
 # See note above the load_dataset_from_feat function definition
 def load_datasets_from_file():
-    #  dataset = tf.keras.utils.get_file(
-  #      fname='aclImdb.tar.gz',
-  #      origin='http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz',
-  #      extract=True)
-  # Assumes this script runs from the top directory containing the test and
-  # train directory.
-  global NUM_WORDS
-  f = open("../imdb.vocab", "r")
-  imdb_vocab = f.readlines()
-  NUM_WORDS = len(imdb_vocab)
-  print('Vocabulary size is: %d words' % (NUM_WORDS))
-  '''
+#  dataset = tf.keras.utils.get_file(
+    #      fname='aclImdb.tar.gz',
+    #      origin='http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz',
+    #      extract=True)
+    # Assumes this script runs from the top directory containing the test and
+    # train directory.
+    global NUM_WORDS
+    f = open("../imdb.vocab", "r")
+    imdb_vocab = f.readlines()
+    NUM_WORDS = len(imdb_vocab)
+    print('Vocabulary size is: %d words' % (NUM_WORDS))
+    '''
   with tf.io.gfile.GFile(os.path.join('..', 'imdb.vocab'), 'r') as f:
     imdb_vocab = f.readlines()
     NUM_WORDS = len(imdb_vocab)
     print('Vocabulary size is: %d words'%(NUM_WORDS))
     '''
 
-  train_data = load_dataset_from_feat(
-      os.path.join('..', 'train'), 'labeledBow.feat')
-  #test_data = load_dataset_from_feat(
-  #    os.path.join('..', 'test'), 'labeledBow.feat')
-  return train_data  # , test_data
+      #test_data = load_dataset_from_feat(
+      #    os.path.join('..', 'test'), 'labeledBow.feat')
+    return load_dataset_from_feat(
+        os.path.join('..', 'train'), 'labeledBow.feat'
+    )
 
 
 # See note above the load_dataset_from_feat function definition
@@ -174,7 +174,7 @@ print(train_files_list[0])
 print(train_files_list[1])
 
 
-train_data = train_data_full[:][0:25000]
+train_data = train_data_full[:][:25000]
 
 print(train_data.head())
 print(train_data['reviews'].iloc[0])
@@ -222,7 +222,7 @@ correct_pred = 0
 for i in range(SAMPLE_SIZE):
     proba = prediction_results[i][0]
 #     Check if model prediction is correct and update counter accordingly
-    if (proba < float(0.5) and train_y[i] == 0) or (proba >= float(0.5) and train_y[i] == 1):
+    if proba < 0.5 and train_y[i] == 0 or proba >= 0.5 and train_y[i] == 1:
         correct_pred = correct_pred + 1
     list_of_proba.append(str(prediction_results[i][0]))
     list_of_file_name.append(list_of_train_files[i])

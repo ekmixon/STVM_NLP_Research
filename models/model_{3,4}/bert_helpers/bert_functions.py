@@ -56,8 +56,7 @@ def get_segments(tokens):
 def get_ids(tokens, tokenizer):
     """Token ids from Tokenizer vocab"""
     token_ids = tokenizer.convert_tokens_to_ids(tokens,)
-    input_ids = token_ids + [0] * (MAX_SEQ_LEN - len(token_ids))
-    return input_ids
+    return token_ids + [0] * (MAX_SEQ_LEN - len(token_ids))
 
 def create_single_input(sentence, tokenizer, max_len):
     """Create an input from a sentence"""
@@ -92,34 +91,31 @@ def convert_sentences_to_features(sentences, tokenizer):
 def get_bert_tokenizer():
     """Instantiate Tokenizer with vocab"""
     vocab_file=bert_layer_no_trainable.resolved_object.vocab_file.asset_path.numpy()
-    do_lower_case=bert_layer_no_trainable.resolved_object.do_lower_case.numpy() 
-    tokenizer=bert.bert_tokenization.FullTokenizer(vocab_file,do_lower_case)
+    do_lower_case=bert_layer_no_trainable.resolved_object.do_lower_case.numpy()
     # Get Bert tokenizer
-    return tokenizer
+    return bert.bert_tokenization.FullTokenizer(vocab_file,do_lower_case)
    
 
 ## Modelling
 def get_model():
     # Load the pre-trained BERT base model
-    bert_layer = hub.KerasLayer(handle=pre_trained_bert_url, trainable=True, name="bert_layer") 
+    bert_layer = hub.KerasLayer(handle=pre_trained_bert_url, trainable=True, name="bert_layer")
     # BERT layer three inputs: ids, masks and segments
-    input_ids = Input(shape=(MAX_SEQ_LEN,), dtype=tf.int32, name="input_ids")    
-    input_masks = Input(shape=(MAX_SEQ_LEN,), dtype=tf.int32, name="input_masks")       
+    input_ids = Input(shape=(MAX_SEQ_LEN,), dtype=tf.int32, name="input_ids")
+    input_masks = Input(shape=(MAX_SEQ_LEN,), dtype=tf.int32, name="input_masks")
     input_segments = Input(shape=(MAX_SEQ_LEN,), dtype=tf.int32, name="segment_ids")
-    
+
     inputs = [input_ids, input_masks, input_segments] # BERT inputs
     pooled_output, sequence_output = bert_layer(inputs) # BERT outputs
-    
+
     # Add a hidden layer
     x = Dense(units=768, activation='relu')(pooled_output)
     x = Dropout(0.1)(x)
- 
+
     # Add output layer
     outputs = Dense(imdb.class_num, activation="softmax", name="predictions")(x)
 
-    # Construct a new model
-    model = Model(inputs=inputs, outputs=outputs)
-    return model
+    return Model(inputs=inputs, outputs=outputs)
 
 # Fit model with the train data
 def fit_model(model, x_train, y_train, x_test, y_test):
@@ -129,15 +125,16 @@ def fit_model(model, x_train, y_train, x_test, y_test):
           loss=LOSS,
           metrics=[METRICS])
 
-    # Fit the data to the model
-    history = model.fit(x_train, y_train,
-                validation_data=(x_test, y_test),
-                #validation_split=0.2, # Important: in production, use all training data
-                epochs=EPOCHS,
-                batch_size=BATCH_SIZE,
-                #callbacks=[tensorboard_callback],
-                verbose = 1)    
-    return history
+    return model.fit(
+        x_train,
+        y_train,
+        validation_data=(x_test, y_test),
+        # validation_split=0.2, # Important: in production, use all training data
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        # callbacks=[tensorboard_callback],
+        verbose=1,
+    )
 
 # Give raw input train data, prepare it and get it ready for train and test.
 # df_fit_data is the same data as df_data except it is shuffled. This is used to create prob file.
@@ -155,18 +152,14 @@ def run_k_fold_cv(df_train, n_folds, *idx):
     partial_run = bool(idx)
     if partial_run:
         # check if a specific fold(s) are specified to run
-        run_folds = []
-        for x in idx:
-            run_folds.append(x)
+        run_folds = list(idx)
         run_text = "Fold {0} will be run.".format(run_folds)
         print(run_text)
-    
+
     # loop through each fold, build models for each fold, evaluate performance of each fold and output run and evaluation results
-    scores, histories = list(), list()
-    i = 0
-    for train_idx, test_idx in kfold.split(df_train):
+    scores, histories = [], []
+    for i, (train_idx, test_idx) in enumerate(kfold.split(df_train), start=1):
         train, test = df_train.iloc[train_idx], df_train.iloc[test_idx]
-        i += 1
         if (partial_run and i in run_folds) or not partial_run:
             # check class balance
             print(test.loc[:, [imdb.label_column]].value_counts())
@@ -177,12 +170,12 @@ def run_k_fold_cv(df_train, n_folds, *idx):
             # Modelling on top of fine-tuned Bert model
             model = get_model()
             #model.summary()
-           
+
             # Get model name
             root_name = model_utils.get_CV_model_root_name ('bert', i, len(y_train), EPOCHS)
             model_name = root_name + ".h5"
             print(model_name)
-            
+
             history = fit_model(model, x_train, y_train, x_test, y_test)
 
             # Save the trained model
@@ -203,7 +196,7 @@ def run_k_fold_cv(df_train, n_folds, *idx):
             scores.append(acc)
             histories.append(history)
             del([model, train, test])
-	
+
     if (not partial_run):
         model_utils.show_mean_acc_std(scores)
         model_utils.summarize_diagnostics(histories)
@@ -212,18 +205,15 @@ def run_k_fold_cv(df_train, n_folds, *idx):
 def evaluate_k_fold_cv(df_train, n_folds):
     # Get Bert tokenizer
     tokenizer = get_bert_tokenizer()
-    
+
     kfold = KFold(n_folds, shuffle=True, random_state=1)
-   
-    # loop through each fold and only run evaluation
-    i = 0
-    scores = list()
-    for train_idx, test_idx in kfold.split(df_train):
-        i += 1
+
+    scores = []
+    for i, (train_idx, test_idx) in enumerate(kfold.split(df_train), start=1):
         train, test = df_train.iloc[train_idx], df_train.iloc[test_idx]
-        
+
         x_test, y_test, df_fit_test = get_data_ready(test)
-        
+
         # Get model name
         root_name = model_utils.get_CV_model_root_name ('bert', i, len(train_idx), EPOCHS)
         model_name = root_name + ".h5"

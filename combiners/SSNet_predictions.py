@@ -18,6 +18,7 @@ SSNet authors and developers:
 ====================================================================================================================
 '''
 
+
 from itertools import combinations
 
 import math
@@ -41,77 +42,75 @@ SAMPLE_SPLIT = ["5KFold1", "5KFold2", "5KFold3", "5KFold4", "5KFold5"]
 base_dir = '../data/'
 
 #train folds
-fold1_5ktr = base_dir + 'tr_te_5k_fold_1.csv'
-fold2_5ktr = base_dir + 'tr_te_5k_fold_2.csv'
-fold3_5ktr = base_dir + 'tr_te_5k_fold_3.csv'
-fold4_5ktr = base_dir + 'tr_te_5k_fold_4.csv'
-fold5_5ktr = base_dir + 'tr_te_5k_fold_5.csv'
+fold1_5ktr = f'{base_dir}tr_te_5k_fold_1.csv'
+fold2_5ktr = f'{base_dir}tr_te_5k_fold_2.csv'
+fold3_5ktr = f'{base_dir}tr_te_5k_fold_3.csv'
+fold4_5ktr = f'{base_dir}tr_te_5k_fold_4.csv'
+fold5_5ktr = f'{base_dir}tr_te_5k_fold_5.csv'
 
 # fold 1 csv files
-model_1_tr_Fold1 = base_dir + "model_1_fold1_5ktrain.csv"
-model_2_tr_Fold1 = base_dir + "model_2_fold1_5ktrain.csv"
-model_3_tr_Fold1 = base_dir + "model_3_fold1_5ktrain.csv"
-model_4_tr_Fold1 = base_dir + "model_4_fold1_5ktrain.csv"
+model_1_tr_Fold1 = f"{base_dir}model_1_fold1_5ktrain.csv"
+model_2_tr_Fold1 = f"{base_dir}model_2_fold1_5ktrain.csv"
+model_3_tr_Fold1 = f"{base_dir}model_3_fold1_5ktrain.csv"
+model_4_tr_Fold1 = f"{base_dir}model_4_fold1_5ktrain.csv"
 
-model_1_te_Fold1 = base_dir + "model_1_fold1_25ktest.csv"
-model_2_te_Fold1 = base_dir + "model_2_fold1_25ktest.csv"
-model_3_te_Fold1 = base_dir + "model_3_fold1_25ktest.csv"
-model_4_te_Fold1 = base_dir + "model_4_fold1_25ktest.csv"
+model_1_te_Fold1 = f"{base_dir}model_1_fold1_25ktest.csv"
+model_2_te_Fold1 = f"{base_dir}model_2_fold1_25ktest.csv"
+model_3_te_Fold1 = f"{base_dir}model_3_fold1_25ktest.csv"
+model_4_te_Fold1 = f"{base_dir}model_4_fold1_25ktest.csv"
 
 # fold 2 csv files
-model_1_tr_Fold2 = base_dir + "model_1_fold2_5ktrain.csv"
-model_2_tr_Fold2 = base_dir + "model_2_fold2_5ktrain.csv"
-model_3_tr_Fold2 = base_dir + "model_3_fold2_5ktrain.csv"
-model_4_tr_Fold2 = base_dir + "model_4_fold2_5ktrain.csv"
+model_1_tr_Fold2 = f"{base_dir}model_1_fold2_5ktrain.csv"
+model_2_tr_Fold2 = f"{base_dir}model_2_fold2_5ktrain.csv"
+model_3_tr_Fold2 = f"{base_dir}model_3_fold2_5ktrain.csv"
+model_4_tr_Fold2 = f"{base_dir}model_4_fold2_5ktrain.csv"
 
-model_1_te_Fold2 = base_dir + "model_1_fold2_25ktest.csv"
-model_2_te_Fold2 = base_dir + "model_2_fold2_25ktest.csv"
-model_3_te_Fold2 = base_dir + "model_3_fold2_25ktest.csv"
-model_4_te_Fold2 = base_dir + "model_4_fold2_25ktest.csv"
+model_1_te_Fold2 = f"{base_dir}model_1_fold2_25ktest.csv"
+model_2_te_Fold2 = f"{base_dir}model_2_fold2_25ktest.csv"
+model_3_te_Fold2 = f"{base_dir}model_3_fold2_25ktest.csv"
+model_4_te_Fold2 = f"{base_dir}model_4_fold2_25ktest.csv"
 
 
 # fold 3 csv files
-model_1_tr_Fold3 = base_dir + "model_1_fold3_5ktrain.csv"
-model_2_tr_Fold3 = base_dir + "model_2_fold3_5ktrain.csv"
-model_3_tr_Fold3 = base_dir + "model_3_fold3_5ktrain.csv"
-model_4_tr_Fold3 = base_dir + "model_4_fold3_5ktrain.csv"
+model_1_tr_Fold3 = f"{base_dir}model_1_fold3_5ktrain.csv"
+model_2_tr_Fold3 = f"{base_dir}model_2_fold3_5ktrain.csv"
+model_3_tr_Fold3 = f"{base_dir}model_3_fold3_5ktrain.csv"
+model_4_tr_Fold3 = f"{base_dir}model_4_fold3_5ktrain.csv"
 
-model_1_te_Fold3 = base_dir + "model_1_fold3_25ktest.csv"
-model_2_te_Fold3 = base_dir + "model_2_fold3_25ktest.csv"
-model_3_te_Fold3 = base_dir + "model_3_fold3_25ktest.csv"
-model_4_te_Fold3 = base_dir + "model_4_fold3_25ktest.csv"
+model_1_te_Fold3 = f"{base_dir}model_1_fold3_25ktest.csv"
+model_2_te_Fold3 = f"{base_dir}model_2_fold3_25ktest.csv"
+model_3_te_Fold3 = f"{base_dir}model_3_fold3_25ktest.csv"
+model_4_te_Fold3 = f"{base_dir}model_4_fold3_25ktest.csv"
 
 
 # fold 4 csv files
-model_1_tr_Fold4 = base_dir + "model_1_fold4_5ktrain.csv"
-model_2_tr_Fold4 = base_dir + "model_2_fold4_5ktrain.csv"
-model_3_tr_Fold4 = base_dir + "model_3_fold4_5ktrain.csv"
-model_4_tr_Fold4 = base_dir + "model_4_fold4_5ktrain.csv"
+model_1_tr_Fold4 = f"{base_dir}model_1_fold4_5ktrain.csv"
+model_2_tr_Fold4 = f"{base_dir}model_2_fold4_5ktrain.csv"
+model_3_tr_Fold4 = f"{base_dir}model_3_fold4_5ktrain.csv"
+model_4_tr_Fold4 = f"{base_dir}model_4_fold4_5ktrain.csv"
 
-model_1_te_Fold4 = base_dir + "model_1_fold4_25ktest.csv"
-model_2_te_Fold4 = base_dir + "model_2_fold4_25ktest.csv"
-model_3_te_Fold4 = base_dir + "model_3_fold4_25ktest.csv"
-model_4_te_Fold4 = base_dir + "model_4_fold4_25ktest.csv"
+model_1_te_Fold4 = f"{base_dir}model_1_fold4_25ktest.csv"
+model_2_te_Fold4 = f"{base_dir}model_2_fold4_25ktest.csv"
+model_3_te_Fold4 = f"{base_dir}model_3_fold4_25ktest.csv"
+model_4_te_Fold4 = f"{base_dir}model_4_fold4_25ktest.csv"
 
 
 # fold 5 csv files
-model_1_tr_Fold5 = base_dir + "model_1_fold5_5ktrain.csv"
-model_2_tr_Fold5 = base_dir + "model_2_fold5_5ktrain.csv"
-model_3_tr_Fold5 = base_dir + "model_3_fold5_5ktrain.csv"
-model_4_tr_Fold5 = base_dir + "model_4_fold5_5ktrain.csv"
+model_1_tr_Fold5 = f"{base_dir}model_1_fold5_5ktrain.csv"
+model_2_tr_Fold5 = f"{base_dir}model_2_fold5_5ktrain.csv"
+model_3_tr_Fold5 = f"{base_dir}model_3_fold5_5ktrain.csv"
+model_4_tr_Fold5 = f"{base_dir}model_4_fold5_5ktrain.csv"
 
-model_1_te_Fold5 = base_dir + "model_1_fold5_25ktest.csv"
-model_2_te_Fold5 = base_dir + "model_2_fold5_25ktest.csv"
-model_3_te_Fold5 = base_dir + "model_3_fold5_25ktest.csv"
-model_4_te_Fold5 = base_dir + "model_4_fold5_25ktest.csv"
+model_1_te_Fold5 = f"{base_dir}model_1_fold5_25ktest.csv"
+model_2_te_Fold5 = f"{base_dir}model_2_fold5_25ktest.csv"
+model_3_te_Fold5 = f"{base_dir}model_3_fold5_25ktest.csv"
+model_4_te_Fold5 = f"{base_dir}model_4_fold5_25ktest.csv"
 
 
 def gen_model_combinations(models):
-    model_combinations = list()
+    model_combinations = []
     for index in range(len(models)):
-        if index < 1:
-            pass
-        else:
+        if index >= 1:
             model_combinations = model_combinations + list(
                 combinations(models, index + 1))
 
@@ -121,11 +120,11 @@ def gen_model_combinations(models):
 def get_prediction_dict(f):
     model_combinations = gen_model_combinations(models)
 
-    training_dict = dict()
+    training_dict = {}
     for combination in model_combinations:
         key = "model_{"
-        list_tr_sample = list()
-        list_te_sample = list()
+        list_tr_sample = []
+        list_te_sample = []
         for item in combination:
             key = key + item.split("_")[1] + ","
             list_tr_sample.append(globals()[item + "_tr_Fold" + f[-1]])
@@ -138,14 +137,12 @@ def get_prediction_dict(f):
 
 
 def get_prediction_th_dict(f):
-    training_dict = dict()
-    list_tr_sample = list()
-    list_te_sample = list()
+    list_tr_sample = []
+    list_te_sample = []
     for model in models:
         list_tr_sample.append(globals()[model + "_tr_Fold" + f[-1]])
         list_te_sample.append(globals()[model + "_te_Fold" + f[-1]])
-    training_dict[f] = [list_tr_sample, list_te_sample]
-    return training_dict
+    return {f: [list_tr_sample, list_te_sample]}
 
 
 imdb_25k_list = list()

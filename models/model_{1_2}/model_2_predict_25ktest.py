@@ -38,12 +38,13 @@ def list_of_test_files():
     sample_dir_list = ['../test/pos/', '../test/neg/']
     list_of_names_of_test_files = []
 #     Loop through sub-directories in sample_dir_list
-    for sample_list_index in range(len(sample_dir_list)):
-        for file in os.listdir(sample_dir_list[sample_list_index]):
-#             Add the (relative) file path to the list
-            if file not in omit_files:
-                list_of_names_of_test_files.append(
-                    sample_dir_list[sample_list_index] + file)
+    for sampledir in sample_dir_list:
+        list_of_names_of_test_files.extend(
+            sampledir + file
+            for file in os.listdir(sampledir)
+            if file not in omit_files
+        )
+
     return list_of_names_of_test_files
 
 
@@ -68,7 +69,7 @@ def download(url_):
     if not os.path.exists(glove_file):
         print("downloading glove embedding .....")
         r = requests.get(url_, glove_file)
-    glove_filename = "glove.6B.{}d.txt".format(EMBEDDING_SIZE)
+    glove_filename = f"glove.6B.{EMBEDDING_SIZE}d.txt"
     if not os.path.exists(glove_filename) and EMBEDDING_SIZE in [50, 100, 200, 300]:
         print("extract glove embeddings ...")
         with zipfile.ZipFile(glove_file, 'r') as z:
@@ -81,14 +82,12 @@ def load_glove():
         word_to_int = defaultdict(int)
         int_to_vec = defaultdict(lambda: np.zeros([EMBEDDING_SIZE]))
 
-        index = 1
-        for line in glove_vectors:
+        for index, line in enumerate(glove_vectors, start=1):
             fields = line.split()
             word = str(fields[0])
             vec = np.asarray(fields[1:], np.float32)
             word_to_int[word] = index
             int_to_vec[index] = vec
-            index += 1
     return word_to_int, int_to_vec
 
 
@@ -180,7 +179,12 @@ correct_pred = 0
 # ...and store the model's polarity prediction for each review
 for i in range(SAMPLE_SIZE):
     proba = prediction_results[i][0]
-    if (proba < float(0.5) and 'neg' in list_of_names_of_test_files[i]) or (proba >= float(0.5) and 'pos' in list_of_names_of_test_files[i]):
+    if (
+        proba < 0.5
+        and 'neg' in list_of_names_of_test_files[i]
+        or proba >= 0.5
+        and 'pos' in list_of_names_of_test_files[i]
+    ):
         correct_pred = correct_pred + 1
 
     list_of_proba.append(str(prediction_results[i][0]))

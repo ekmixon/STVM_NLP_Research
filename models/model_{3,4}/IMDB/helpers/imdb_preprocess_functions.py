@@ -33,7 +33,10 @@ def get_imdb_df_data():
     df_master[label_column].replace('neg',0.,inplace=True)
     # Read the IMDB training dataset into Pandas dataframe
     df_train = df_master[df_master['type'] == 'train']
-    print("The number of rows and columns in the training dataset is: {}".format(df_train.shape))
+    print(
+        f"The number of rows and columns in the training dataset is: {df_train.shape}"
+    )
+
     # Identify missing values in train dataset
     train_missing = df_train.apply(lambda x: sum(x.isnull()), axis=0)
     print ('Missing values in train dataset:')
@@ -43,7 +46,10 @@ def get_imdb_df_data():
     print ('Check train class balance')
     print (train_class_balance)
     df_test = df_master[df_master['type'] == 'test']
-    print("The number of rows and columns in the test dataset is: {}".format(df_test.shape))
+    print(
+        f"The number of rows and columns in the test dataset is: {df_test.shape}"
+    )
+
     # Identify missing values in test dataset
     test_missing = df_test.apply(lambda x: sum(x.isnull()), axis=0)
     print ('Missing values in test dataset:')
@@ -55,7 +61,7 @@ def get_imdb_df_data():
     return df_train, df_test
 
 # Generate IMDB training model name depending on run type
-def get_model_name (run_type, output_dir, model_type, split_train_size, epoch_num):
+def get_model_name(run_type, output_dir, model_type, split_train_size, epoch_num):
     model_file_prefix = ''
     root_name = output_dir + 'model_' + model_type
     if run_type == 1:
@@ -65,7 +71,7 @@ def get_model_name (run_type, output_dir, model_type, split_train_size, epoch_nu
     if run_type == 3:
         model_name = root_name +'_'+ 'epoch_' + str(epoch_num) + "_tmp.h5"
     else:
-        model_name = model_file_prefix + 'epoch_' + str(epoch_num) + ".h5"
+        model_name = f'{model_file_prefix}epoch_{str(epoch_num)}.h5'
     return model_name, root_name
 
 # Give a whole dataset, extract specified size of data for testing run. Make sure the data is balanced in classes
@@ -74,8 +80,14 @@ def get_test_run_data(df_train_data, df_test_data, run_size):
     df_train = df_train_data.sample(frac=1, random_state=0)[:run_size]
     df_test = df_test_data.sample(frac=1, random_state=0)[:run_size]
 #     df_test = df_test[:run_size]
-    print("The number of rows and columns in the training dataset is: {}".format(df_train.shape))
-    print("The number of rows and columns in the test dataset is: {}".format(df_test.shape))
+    print(
+        f"The number of rows and columns in the training dataset is: {df_train.shape}"
+    )
+
+    print(
+        f"The number of rows and columns in the test dataset is: {df_test.shape}"
+    )
+
     # Check the test dataset class balance
     train_class_balance = df_train[label_column].value_counts()
     print ('Check rain class balance')

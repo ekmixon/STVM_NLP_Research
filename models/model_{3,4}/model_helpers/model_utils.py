@@ -132,61 +132,58 @@ def get_categorical(Y):
 
 # evaluate a model using k-fold cross-validation
 def evaluate_model(df, n_folds, model):
-	scores, histories = list(), list()
-	# prepare cross validation
-	kfold = KFold(n_folds, shuffle=True, random_state=1)
-	# enumerate splits
-	for train_ix, test_ix in kfold.split(df):
-		train, test = df_train.iloc[train_idx], df_train.iloc[test_idx]
-		# fit model
-		history = model.fit(trainX, trainY, epochs=10, batch_size=32, validation_data=(testX, testY), verbose=0)
-		# evaluate model
-		_, acc = model.evaluate(testX, testY, verbose=0)
-		print('> %.3f' % (acc * 100.0))
-		# stores scores
-		scores.append(acc)
-		histories.append(history)
-	return scores, histories
+    scores, histories = [], []
+    # prepare cross validation
+    kfold = KFold(n_folds, shuffle=True, random_state=1)
+    # enumerate splits
+    for train_ix, test_ix in kfold.split(df):
+    	train, test = df_train.iloc[train_idx], df_train.iloc[test_idx]
+    	# fit model
+    	history = model.fit(trainX, trainY, epochs=10, batch_size=32, validation_data=(testX, testY), verbose=0)
+    	# evaluate model
+    	_, acc = model.evaluate(testX, testY, verbose=0)
+    	print('> %.3f' % (acc * 100.0))
+    	# stores scores
+    	scores.append(acc)
+    	histories.append(history)
+    return scores, histories
 
 # Get model name for k-fold cross-validation without extention. CV for cross-validation.
 # Modal name composition rule: 1. model_output (/wrk/hnj9/model_output/), 2. model_type (bert/use), 3. ith fold number, 
 # 4. train data size and 5. epoch number
 # Get model root name (extention: .h5)
-def get_CV_model_root_name (model_type, i, train_size, epoch_num):
+def get_CV_model_root_name(model_type, i, train_size, epoch_num):
     model_dir = root_output_dir + model_type + '/'
     model_file_postfix = "_" + "fold_" + str(i) + '_tr' + str(train_size) + '_' + str(epoch_num)
-    root_name = model_dir + 'model_' + model_type + model_file_postfix
-    return root_name
+    return model_dir + 'model_' + model_type + model_file_postfix
 
 # Get evaluation file root name  (_eval.txt)
-def get_CV_eval_root_name (model_root_name, test_size):
-    eval_root_name = model_root_name + '_te' + str(test_size) + '_eval'
-    return eval_root_name
+def get_CV_eval_root_name(model_root_name, test_size):
+    return model_root_name + '_te' + str(test_size) + '_eval'
 
 # Get probability output file root (name _prob.csv)
-def get_CV_prob_root_name (model_root_name, test_size):
-    prob_root_name = model_root_name + '_te' + str(test_size) + '_prob'
-    return prob_root_name
+def get_CV_prob_root_name(model_root_name, test_size):
+    return model_root_name + '_te' + str(test_size) + '_prob'
 
 
 # For cross-validation. loop through each fold, run evaluation with the test data provided and create run results and evaluation results
 # Assume the models in all folds are already built
 def evaluate_test_dataset_k_fold(x_test, y_test, n_folds, model_type, EPOCHS, BATCH_SIZE, df_fit_test, train_size):
-    scores = list()
+    scores = []
     for i in range(1, n_folds+1):
         # Get model name
         root_name = get_CV_model_root_name (model_type, i, train_size, EPOCHS)
         model_name = root_name + ".h5"
         print(model_name)
-        
+
         model = load_model(model_name, custom_objects={'KerasLayer':hub.KerasLayer})
-        
+
         prediction_prob, results = get_model_performance(model, root_name, x_test, y_test, BATCH_SIZE)
         acc = results[1]
-        
+
         result_root_name = get_CV_prob_root_name (root_name, len(y_test))
         output_prob_file(df_fit_test, result_root_name, prediction_prob)
-        
+
         print('> %.3f' % (float(acc) * 100.0))
         scores.append(acc)
 

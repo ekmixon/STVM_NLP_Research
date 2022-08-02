@@ -32,8 +32,7 @@ SAMPLE_SIZE = 25000
 
 # This function is reused from the model_1.py script; see that file for more information
 def load_dataset_from_feat(directory, feat_file_name, use_for_predictions=False):
-  data = {}
-  data['reviews'] = []
+  data = {'reviews': []}
   if not use_for_predictions:
     data['sentiments'] = []
 
@@ -112,7 +111,7 @@ train_data_full, test_data_full = load_datasets_from_file()
 print(test_data_full.shape)
 print(test_data_full.head())
 
-test_data = test_data_full[:][0:25000]
+test_data = test_data_full[:][:25000]
 
 print(test_data.head())
 print(test_data['reviews'].iloc[0])
@@ -125,33 +124,29 @@ omit_files = [".DS_Store"]
 
 
 def lf():
-    ff_pos_l = []
-    ff_pos_r = []
-    ff = []
-    for filename in os.listdir('../test/pos/'):
-        if filename not in omit_files:
-            ff_pos_l.append(int(filename.split('_')[0]))
-            ff_pos_r.append(filename.split('_')[1])
-    #print(ff_pos_l[0], ff_pos_r[0])
-    z = list(zip(ff_pos_l, ff_pos_r))
-    z = sorted(z)
-    ff_pos_l, ff_pos_r = zip(*z)
-    for i in range(len(ff_pos_l)):
-        ff.append(str(ff_pos_l[i]) + '_' + ff_pos_r[i])
+  ff_pos_l = []
+  ff_pos_r = []
+  for filename in os.listdir('../test/pos/'):
+      if filename not in omit_files:
+          ff_pos_l.append(int(filename.split('_')[0]))
+          ff_pos_r.append(filename.split('_')[1])
+  #print(ff_pos_l[0], ff_pos_r[0])
+  z = list(zip(ff_pos_l, ff_pos_r))
+  z = sorted(z)
+  ff_pos_l, ff_pos_r = zip(*z)
+  ff = [f'{str(ff_pos_l[i])}_' + ff_pos_r[i] for i in range(len(ff_pos_l))]
+  ff_neg_l = []
+  ff_neg_r = []
 
-    ff_neg_l = []
-    ff_neg_r = []
-
-    for filename in os.listdir('../test/neg/'):
-        if filename not in omit_files:
-            ff_neg_l.append(int(filename.split('_')[0]))
-            ff_neg_r.append(filename.split('_')[1])
-    z = list(zip(ff_neg_l, ff_neg_r))
-    z = sorted(z)
-    ff_neg_l, ff_neg_r = zip(*z)
-    for i in range(len(ff_neg_l)):
-        ff.append(str(ff_neg_l[i]) + '_' + ff_neg_r[i])
-    return ff
+  for filename in os.listdir('../test/neg/'):
+      if filename not in omit_files:
+          ff_neg_l.append(int(filename.split('_')[0]))
+          ff_neg_r.append(filename.split('_')[1])
+  z = list(zip(ff_neg_l, ff_neg_r))
+  z = sorted(z)
+  ff_neg_l, ff_neg_r = zip(*z)
+  ff.extend(f'{str(ff_neg_l[i])}_' + ff_neg_r[i] for i in range(len(ff_neg_l)))
+  return ff
 
 
 list_of_names_of_test_files = lf()
@@ -176,12 +171,12 @@ print("predict shape", prediction_results.shape)
 # Store a counter of the number of correct predictions over the (test) datset
 correct_pred = 0
 for i in range(SAMPLE_SIZE):
-    proba = prediction_results[i][0]
+  proba = prediction_results[i][0]
 #     Check if model prediction is correct and update counter accordingly
-    if (proba < float(0.5) and i >= 12500) or (proba >= float(0.5) and i < 12500):
-        correct_pred = correct_pred + 1
-    list_of_proba.append(str(prediction_results[i][0]))
-    list_of_file_name.append(list_of_names_of_test_files[i])
+  if proba < 0.5 and i >= 12500 or proba >= 0.5 and i < 12500:
+    correct_pred = correct_pred + 1
+  list_of_proba.append(str(prediction_results[i][0]))
+  list_of_file_name.append(list_of_names_of_test_files[i])
 
 d_prob = {'prob': list_of_proba}
 d_files = {'file': list_of_file_name}

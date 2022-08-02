@@ -29,7 +29,7 @@ TRAINING_SAMPLE = 5000
 
 train_csv_file = 'imdb_train_5k.csv'
 train_y = np.zeros([TRAINING_SAMPLE, 1], dtype=np.int)
-list_of_train_reviews = list()
+list_of_train_reviews = []
 
 glove_file = "glove.6B.zip"
 EMBEDDING_SIZE = 100
@@ -40,7 +40,7 @@ def download(url_):
     if not os.path.exists(glove_file):
         print("downloading glove embedding .....")
         r = requests.get(url_, glove_file)
-    glove_filename = "glove.6B.{}d.txt".format(EMBEDDING_SIZE)
+    glove_filename = f"glove.6B.{EMBEDDING_SIZE}d.txt"
     if not os.path.exists(glove_filename) and EMBEDDING_SIZE in [50, 100, 200, 300]:
         print("extract glove embeddings ...")
         with zipfile.ZipFile(glove_file, 'r') as z:
@@ -53,14 +53,12 @@ def load_glove():
         word_to_int = defaultdict(int)
         int_to_vec = defaultdict(lambda: np.zeros([EMBEDDING_SIZE]))
 
-        index = 1
-        for line in glove_vectors:
+        for index, line in enumerate(glove_vectors, start=1):
             fields = line.split()
             word = str(fields[0])
             vec = np.asarray(fields[1:], np.float32)
             word_to_int[word] = index
             int_to_vec[index] = vec
-            index += 1
     return word_to_int, int_to_vec
 
 
@@ -68,8 +66,8 @@ download("http://nlp.stanford.edu/data/glove.6B.zip")
 word_to_int, int_to_vec = load_glove()
 
 
-list_of_filename = list()
-list_of_y = list()
+list_of_filename = []
+list_of_y = []
 
 
 # Load text data from a local file and run preprocessing/cleaning filters
@@ -172,7 +170,7 @@ print("predict shape", prediction_results.shape)
 correct_pred = 0
 for i in range(TRAINING_SAMPLE):
     proba = prediction_results[i][0]
-    if (proba < float(0.5) and train_y[i] == 0) or (proba >= float(0.5) and train_y[i] == 1):
+    if proba < 0.5 and train_y[i] == 0 or proba >= 0.5 and train_y[i] == 1:
         correct_pred = correct_pred + 1
     list_of_proba.append(str(prediction_results[i][0]))
     list_of_file_names.append(list_of_filename[i])

@@ -28,28 +28,19 @@ def _max(a, b):
     b_mx = max(b)
     b_idx = b.index(b_mx)
 
-    if a_mx >= b_mx:
-        return a_idx
-    else:
-        return b_idx
+    return a_idx if a_mx >= b_mx else b_idx
 
 
 def _avg(a, b):
     p0 = (a[0] + b[0]) / float(2)
     p1 = (a[1] + b[1]) / float(2)
-    if p0 >= p1:
-        return 0
-    else:
-        return 1
+    return 0 if p0 >= p1 else 1
 
 
 def _sum(a, b):
     p0 = a[0] + b[0]
     p1 = a[1] + b[1]
-    if p0 >= p1:
-        return 0
-    else:
-        return 1
+    return 0 if p0 >= p1 else 1
 
 
 def threshold_one_on_three(c, current_th, dict_list, clist, data, resolve):
@@ -80,7 +71,7 @@ def threshold_one_on_three(c, current_th, dict_list, clist, data, resolve):
 
                 ll_max_index = ll[_max_item_index]
                 max_idx = ll[_max_item_index].index(max(ll[_max_item_index]))
-                
+
                 if max_idx == label:
                     correct_pred = correct_pred + 1
                 else:
@@ -95,7 +86,7 @@ def threshold_one_on_three(c, current_th, dict_list, clist, data, resolve):
                     correct_pred = correct_pred + 1
                 else:
                     wrong_pred = wrong_pred + 1
-            
+
             if resolve == 'sum':
                 p0 = (x_proba[0] + y_proba[0] + z_proba[0])
                 p1 = (x_proba[1] + y_proba[1] + z_proba[1])
@@ -105,12 +96,12 @@ def threshold_one_on_three(c, current_th, dict_list, clist, data, resolve):
                     correct_pred = correct_pred + 1
                 else:
                     wrong_pred = wrong_pred + 1
-            
+
             if resolve == 'maj':
                 ix = x_proba.index(max(x_proba))
                 iy = y_proba.index(max(y_proba))
                 iz = z_proba.index(max(z_proba))
-                
+
                 if ix == iy == iz:
                     if ix == label:
                         correct_pred = correct_pred + 1

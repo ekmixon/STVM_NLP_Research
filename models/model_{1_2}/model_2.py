@@ -43,8 +43,8 @@ val_csv_file = "imdb_train_5k.csv"
 train_y = np.zeros([TRAINING_SAMPLE, 1], dtype=np.int)
 val_y = np.zeros([VALIDATION_SAMPLE, 1], dtype=np.int)
 
-list_of_train_reviews = list()
-list_of_validation_reviews = list()
+list_of_train_reviews = []
+list_of_validation_reviews = []
 
 # Name of compressed file containing word embeddings
 # If not already downloaded, this is the (relative) path the embeddings will be downloaded to
@@ -57,7 +57,7 @@ def download(url_):
     if not os.path.exists(glove_file):
         print("downloading glove embedding .....")
         r = requests.get(url_, glove_file)
-    glove_filename = "glove.6B.{}d.txt".format(EMBEDDING_SIZE)
+    glove_filename = f"glove.6B.{EMBEDDING_SIZE}d.txt"
 #     Check if the relevant embeddings have been extracted from the archive;
 #     if not, unzip the embeddings into the same directory
     if not os.path.exists(glove_filename) and EMBEDDING_SIZE in [50, 100, 200, 300]:
@@ -72,14 +72,12 @@ def load_glove():
         word_to_int = defaultdict(int)
         int_to_vec = defaultdict(lambda: np.zeros([EMBEDDING_SIZE]))
 
-        index = 1
-        for line in glove_vectors:
+        for index, line in enumerate(glove_vectors, start=1):
             fields = line.split()
             word = str(fields[0])
             vec = np.asarray(fields[1:], np.float32)
             word_to_int[word] = index
             int_to_vec[index] = vec
-            index += 1
     return word_to_int, int_to_vec
 
 
@@ -88,43 +86,37 @@ word_to_int, int_to_vec = load_glove()
 
 
 #list_of_filename = list()
-list_of_y = list()
+list_of_y = []
 
 #list_of_filename_val = list()
-list_of_y_val = list()
+list_of_y_val = []
 
 # Process data and generate training sample
 def create_training_sample(filename, if_train):
 #     Load samples from CSV file
     df_train = pd.read_csv(filename)
     SAMPLE_SIZE = len(df_train)
-#     Check that number of samples in dataset (i.e., DataFrame loaded from `filename`) is correct
     if if_train:
         assert SAMPLE_SIZE == TRAINING_SAMPLE, 'training sample not complete....'
-    else:
-        assert SAMPLE_SIZE == VALIDATION_SAMPLE, 'validation sample not complete....'
-
-    if if_train:
 #         Shuffle training data
         df_train = df_train.sample(frac=1)
 
+    else:
+        assert SAMPLE_SIZE == VALIDATION_SAMPLE, 'validation sample not complete....'
 #     Loop through reviews in dataset
     for index in df_train.index:
         review = str(df_train['review'][index])
         label = int(df_train['label'][index])
         #list_of_filename.append(df_train['file'][index])
         review = review.lower()
-        
 #         Remove newline tags
         review = review.replace("<br />", " ")
 #         Replace characters other than letters and spaces with whitespace
         review = re.sub(r"[^a-z ]", " ", review)
 #         Remove consecutive spaces in review
         review = re.sub(r" +", " ", review)
-
 #         Split review string into words
         review = review.split(" ")
-
 #         Add the review and label to the relevant lists
         if if_train:
             list_of_train_reviews.append(review)

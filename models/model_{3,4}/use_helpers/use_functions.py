@@ -109,15 +109,16 @@ def fit_model(model, x_train, y_train, x_test, y_test):
           loss=LOSS,
           metrics=[METRICS])
 
-    # Fit the data to the model
-    history = model.fit(x_train, y_train,
-                validation_data=(x_test, y_test),
-                #validation_split=0.2, # Important: in production, use all training data
-                epochs=EPOCHS,
-                batch_size=BATCH_SIZE,
-                #callbacks=[tensorboard_callback],
-                verbose = 1)    
-    return history
+    return model.fit(
+        x_train,
+        y_train,
+        validation_data=(x_test, y_test),
+        # validation_split=0.2, # Important: in production, use all training data
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        # callbacks=[tensorboard_callback],
+        verbose=1,
+    )
 
 
 
@@ -127,17 +128,13 @@ def run_k_fold_cv(df_train, n_folds, *idx):
     partial_run = bool(idx)
     if partial_run:
         # check if a specific fold(s) are specified to run
-        run_folds = []
-        for x in idx:
-            run_folds.append(x)
+        run_folds = list(idx)
         run_text = "Fold {0} will be run.".format(run_folds)
         print(run_text)
-    
+
     # loop through each fold, build models for each fold, evaluate performance of each fold and output run and evaluation results
-    scores, histories = list(), list()
-    i = 0
-    for train_idx, test_idx in kfold.split(df_train):
-        i += 1
+    scores, histories = [], []
+    for i, (train_idx, test_idx) in enumerate(kfold.split(df_train), start=1):
         train, test = df_train.iloc[train_idx], df_train.iloc[test_idx]
         if (partial_run and i in run_folds) or not partial_run:
 
@@ -145,29 +142,28 @@ def run_k_fold_cv(df_train, n_folds, *idx):
             print(test.loc[:, [imdb.label_column]].value_counts())
 
             x_train, y_train, df_fit_train = get_data_ready(train)
-            
+
             x_test, y_test, df_fit_test = get_data_ready(test)
-            
-           
+
+
             # Get model name
             root_name = model_utils.get_CV_model_root_name ('use', i, len(y_train), EPOCHS)
-            model_name = root_name + ".h5"
-            print("Current model: " + model_name)
-            
+            model_name = f"{root_name}.h5"
+            print(f"Current model: {model_name}")
+
             model = get_model(2)
             # model.summary()
-            
+
             history = fit_model(model, x_train, y_train, x_test, y_test)
 
             # Save the trained model
             model.save(model_name)
             model_utils.get_history(history)
-
         #     plt.pcolormesh(y_test)
         #     plt.show()
 
             # Get predictions for test data
-            print("Evaluate model: " + model_name)
+            print(f"Evaluate model: {model_name}")
             prediction_prob, results = model_utils.get_model_performance(model, root_name, x_test, y_test, BATCH_SIZE)
 
             # Create result file
@@ -179,7 +175,7 @@ def run_k_fold_cv(df_train, n_folds, *idx):
             # stores scores
             scores.append(acc)
             histories.append(history)
-	
+
     if (not partial_run):
         model_utils.summarize_diagnostics(histories)
         model_utils.show_mean_acc_std(scores)
@@ -187,18 +183,15 @@ def run_k_fold_cv(df_train, n_folds, *idx):
 # Evaluate all folds and get the summary
 def evaluate_k_fold_cv(df_train, n_folds):
     kfold = KFold(n_folds, shuffle=True, random_state=1)
-    # loop through each fold and only run evaluation
-    i = 0
-    scores = list()
-    for train_idx, test_idx in kfold.split(df_train):
-        i += 1
+    scores = []
+    for i, (train_idx, test_idx) in enumerate(kfold.split(df_train), start=1):
         train, test = df_train.iloc[train_idx], df_train.iloc[test_idx]
-        
+
         x_test, y_test, df_fit_test = get_data_ready(test)
-        
+
         # Get model name
         root_name = model_utils.get_CV_model_root_name ('use', i, len(train_idx), EPOCHS)
-        model_name = root_name + ".h5"
+        model_name = f"{root_name}.h5"
         print(model_name)
 
         from tensorflow.keras.models import load_model

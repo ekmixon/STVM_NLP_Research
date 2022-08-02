@@ -35,19 +35,16 @@ def dense(tr_list, imdb_tr_list, te_list, imdb_te_list):
 
     for idx in range(len(tr_list)):
         assert len(tr_list[idx]) == TR_SAMPLE_SIZE, "train mismatch samples"
-    
+
     train_x = np.zeros([TR_SAMPLE_SIZE, TR_PROBA], dtype=np.float64)
-    train_y = list()
+    train_y = []
 
     for idx in range(TR_SAMPLE_SIZE):
         ll = imdb_tr_list[idx]
         fn = ll[0]
         label = int(ll[1])
 
-        x = []
-        for i in range(TR_PROBA):
-            x.append(tr_list[i][fn])
-
+        x = [tr_list[i][fn] for i in range(TR_PROBA)]
         x_ = np.array(x)
         train_x[idx] = x_
         train_y.append(label)
@@ -81,21 +78,18 @@ def dense(tr_list, imdb_tr_list, te_list, imdb_te_list):
 
 
     x_predict = np.zeros([len(imdb_te_list), TE_PROBA], dtype=np.float64)
-    y_actual = list()
+    y_actual = []
 
     for idx in range(TE_SAMPLE_SIZE):
         ll = imdb_te_list[idx]
         fn = ll[0]
         label = int(ll[1])
 
-        x = []
-        for i in range(TE_PROBA):
-            x.append(te_list[i][fn])
-
+        x = [te_list[i][fn] for i in range(TE_PROBA)]
         x_ = np.array(x)
         x_predict[idx] = x_
         y_actual.append(label)
-    
+
     y_pred = model.predict(x_predict)
 
     correct_pred = 0
@@ -106,7 +100,7 @@ def dense(tr_list, imdb_tr_list, te_list, imdb_te_list):
             correct_pred = correct_pred + 1
         else:
             wrong_pred = wrong_pred + 1
-    
+
     assert (correct_pred + wrong_pred) == TE_SAMPLE_SIZE, "mismatch size"
 
     _acc = float(correct_pred)/float(TE_SAMPLE_SIZE)
